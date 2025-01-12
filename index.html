@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,11 +10,14 @@
             background-color: #f7cac9; /* White background */
             text-align: center;
             padding: 20px;
-            font-size: 0.5em; /* Smaller font size (1/3 of the original size) */
+            font-size: 1rem; /* Smaller font size (1/3 of the original size) */
         }
         .container {
             max-width: 1000px;
             margin: 0 auto;
+        }
+        .header {
+            font-size: 1.5rem;
         }
         .pair {
             display: flex;
@@ -45,6 +47,10 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            display: none; /* Initially hide the download button */
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
         }
         #download-btn:hover {
             background-color: #45a049;
@@ -52,11 +58,12 @@
     </style>
 </head>
 <body>
-    <h1>Rank Your Favorite SEVENTEEN Member</h1>
+    <h1 class="header">Rank Your Favorite SEVENTEEN Member</h1>
     <div class="container">
         <h2>Step 1: Choose Your Favorite Between Two Members</h2>
         <div id="pair" class="pair"></div>
         <div class="result" id="result"></div>
+        <button id="download-btn" onclick="downloadRankingAsImage()">Download Ranking</button>
     </div>
 
     <script>
@@ -112,21 +119,46 @@
             });
             resultDiv.appendChild(list);
 
-            // Add download button
-            var downloadButton = document.createElement("button");
-            downloadButton.id = "download-btn";
-            downloadButton.innerText = "Download Ranking as Image";
-            downloadButton.onclick = downloadRankingAsImage;
-            resultDiv.appendChild(downloadButton);
+            // Show download button
+            var downloadButton = document.getElementById("download-btn");
+            downloadButton.style.display = "block"; // Show the download button
+
+            // Remove pair div
+            var pairDiv = document.getElementById("pair");
+            if (pairDiv) {
+                pairDiv.remove();
+            }
         }
 
         function downloadRankingAsImage() {
             var resultElement = document.getElementById("result");
-            html2canvas(resultElement).then(function(canvas) {
-                var link = document.createElement("a");
-                link.download = 'seventeen_ranking.png';
-                link.href = canvas.toDataURL();
-                link.click();
+            html2canvas(resultElement, { useCORS: true }).then(function(canvas) {
+                // For mobile devices, directly save to photo album instead of downloading as a file
+                if (typeof navigator !== 'undefined' && navigator.userAgent.includes('Mobile')) {
+                    canvas.toBlob(function(blob) {
+                        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                            window.navigator.msSaveOrOpenBlob(blob, 'seventeen_ranking.png');
+                        } else {
+                            var newImg = document.createElement('img'),
+                                url = URL.createObjectURL(blob);
+                            newImg.onload = function() {
+                                window.URL.revokeObjectURL(url);
+                                var link = document.createElement("a");
+                                link.href = url;
+                                link.download = 'seventeen_ranking.png';
+                                link.click();
+                            };
+                            newImg.src = url;
+                        }
+                    });
+                } else {
+                    var link = document.createElement("a");
+                    link.download = 'seventeen_ranking.png';
+                    link.href = canvas.toDataURL();
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
             });
         }
 
