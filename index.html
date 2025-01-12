@@ -1,0 +1,144 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEVENTEEN Favorite Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #c084f5, #f3a6ff);
+            color: #fff;
+            text-align: center;
+        }
+        h1 {
+            margin-top: 20px;
+            font-size: 2.5em;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .button {
+            display: inline-block;
+            background: #6c63ff;
+            color: #fff;
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .button:hover {
+            background: #574b90;
+        }
+        #result {
+            margin-top: 20px;
+            display: none;
+        }
+        #rankings {
+            list-style: none;
+            padding: 0;
+        }
+        #rankings li {
+            background: rgba(255, 255, 255, 0.2);
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Who’s Your Favorite SEVENTEEN Member?</h1>
+    <div class="container">
+        <div id="quiz">
+            <p id="question"></p>
+            <button class="button" id="option1"></button>
+            <button class="button" id="option2"></button>
+        </div>
+        <div id="result">
+            <h2>Your Ranking:</h2>
+            <ol id="rankings"></ol>
+        </div>
+    </div>
+    <script>
+        const members = [
+            "S.COUPS", "Jeonghan", "Joshua", "Jun", "Hoshi",
+            "Wonwoo", "Woozi", "DK", "Mingyu", "The8",
+            "Seungkwan", "Vernon", "Dino"
+        ];
+        let comparisons = [];
+        let rankings = [];
+
+        // Generate all pair comparisons
+        for (let i = 0; i < members.length; i++) {
+            for (let j = i + 1; j < members.length; j++) {
+                comparisons.push([members[i], members[j]]);
+            }
+        }
+
+        // Shuffle the comparisons
+        comparisons.sort(() => Math.random() - 0.5);
+
+        let currentIndex = 0;
+
+        // Display the next pair
+        function displayPair() {
+            if (currentIndex < comparisons.length) {
+                const [a, b] = comparisons[currentIndex];
+                document.getElementById("question").innerText = `Who do you prefer?`;
+                document.getElementById("option1").innerText = a;
+                document.getElementById("option2").innerText = b;
+            } else {
+                showResult();
+            }
+        }
+
+        // Record the choice and move to the next pair
+        function recordChoice(choice) {
+            rankings.push(choice);
+            currentIndex++;
+            displayPair();
+        }
+
+        // Show the final rankings
+        function showResult() {
+            const resultContainer = document.getElementById("result");
+            const quizContainer = document.getElementById("quiz");
+            const rankingsList = document.getElementById("rankings");
+
+            quizContainer.style.display = "none";
+            resultContainer.style.display = "block";
+
+            // Count the occurrences of each member in rankings
+            const rankingCounts = {};
+            rankings.forEach(member => {
+                rankingCounts[member] = (rankingCounts[member] || 0) + 1;
+            });
+
+            // Sort members by most preferred
+            const sortedMembers = Object.keys(rankingCounts).sort((a, b) => rankingCounts[b] - rankingCounts[a]);
+
+            // Display the sorted rankings
+            rankingsList.innerHTML = "";
+            sortedMembers.forEach((member, index) => {
+                const li = document.createElement("li");
+                li.innerText = `${index + 1}. ${member}`;
+                rankingsList.appendChild(li);
+            });
+        }
+
+        // Set up event listeners
+        document.getElementById("option1").addEventListener("click", () => recordChoice(comparisons[currentIndex][0]));
+        document.getElementById("option2").addEventListener("click", () => recordChoice(comparisons[currentIndex][1]));
+
+        // Start the quiz
+        displayPair();
+    </script>
+</body>
+</html>
